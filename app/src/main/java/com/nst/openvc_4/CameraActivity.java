@@ -19,12 +19,15 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 
+import java.io.IOException;
+
 public class CameraActivity extends Activity implements CameraBridgeViewBase.CvCameraViewListener2 {
     private static final String TAG="MainActivity";
 
     private Mat mRgba;
-    private Mat mGrey;
+    private Mat mGray;
     private CameraBridgeViewBase mOpenCvCameraView;
+    private face_Recognition face_Recognition;
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(this) {
         @Override
         public void onManagerConnected(int status) {
@@ -64,6 +67,13 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
         mOpenCvCameraView=(CameraBridgeViewBase) findViewById(R.id.frame_Surface);
         mOpenCvCameraView.setVisibility(SurfaceView.VISIBLE);
         mOpenCvCameraView.setCvCameraViewListener(this);
+
+        try {
+            int inputSize = 96;
+            face_Recognition = new face_Recognition(getAssets(), CameraActivity.this, "model.tflite", inputSize);
+        }catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -95,7 +105,7 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
 
     public void onCameraViewStarted(int width, int height) {
         mRgba = new Mat(height, width, CvType.CV_8UC4);
-        mGrey = new Mat(height, width, CvType.CV_8UC1);
+        mGray = new Mat(height, width, CvType.CV_8UC1);
     }
 
     public void onCameraViewStopped() {
@@ -104,7 +114,7 @@ public class CameraActivity extends Activity implements CameraBridgeViewBase.CvC
 
     public Mat onCameraFrame(CameraBridgeViewBase.CvCameraViewFrame inputFrame) {
         mRgba = inputFrame.rgba();
-        mGrey = inputFrame.gray();
+        mGray = inputFrame.gray();
         return mRgba;
     }
 }
